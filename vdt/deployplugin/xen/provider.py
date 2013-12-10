@@ -1,4 +1,4 @@
-import XenAPI
+from XenAPI import Session
 from vdt.deploy import api, pretty
 from vdt.deploy.userdata import UserData
 from vdt.deploy.utils import find_by_key, \
@@ -14,7 +14,7 @@ class Provider(api.CmdApi):
     prompt = "xen> "
 
     def __init__(self):
-        self.session = XenAPI.Session(cfg.APIURL)
+        self.session = Session(cfg.APIURL)
         self.session.login_with_password(cfg.USERNAME, cfg.PASSWORD)
         api.CmdApi.__init__(self)
 
