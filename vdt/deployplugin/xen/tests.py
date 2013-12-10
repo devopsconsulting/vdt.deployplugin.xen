@@ -17,7 +17,7 @@ from vdt.deployplugin.xen import mockconfig
 from vdt.deploy.utils import StringCaster
 
 
-class ProviderCloudstackTest(unittest.TestCase):
+class ProviderXenTest(unittest.TestCase):
 
     def setUp(self):
         reload(mockconfig)
