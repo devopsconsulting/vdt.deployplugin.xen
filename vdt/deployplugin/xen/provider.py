@@ -83,3 +83,20 @@ class Provider(api.CmdApi):
             self.session.xenapi.VM.clean_shutdown(machine_ref)
         except XenAPI.Failure:
             print "machine with id %s is not found" % machine_id
+
+    def do_reboot(self, machine_id):
+        """
+        Reboot a running machine.
+
+        Usage::
+
+            xen> reboot <machine_id>
+        """
+        try:
+            machine_ref = self.session.xenapi.VM.get_by_uuid(machine_id)
+
+            print "rebooting machine with id %s" % machine_id
+            self.session.xenapi.VM.clean_reboot(machine_ref)
+        except XenAPI.Failure:
+            print "machine with id %s is not found" % machine_id
+        
