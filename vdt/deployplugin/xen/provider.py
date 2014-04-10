@@ -51,3 +51,35 @@ class Provider(api.CmdApi):
             cloudstack> quit
         """
         return True
+
+    def do_start(self, machine_id):
+        """
+        Start a stopped machine.
+
+        Usage::
+
+            xen> start <machine_id>
+        """
+        try:
+            machine_ref = self.session.xenapi.VM.get_by_uuid(machine_id)
+
+            print "starting machine with id %s" % machine_id
+            self.session.xenapi.VM.start(machine_ref, False, False)
+        except XenAPI.Failure:
+            print "machine with id %s is not found" % machine_id
+
+    def do_stop(self, machine_id):
+        """
+        Stop a running machine.
+
+        Usage::
+
+            xen> stop <machine_id>
+        """
+        try:
+            machine_ref = self.session.xenapi.VM.get_by_uuid(machine_id)
+
+            print "stopping machine with id %s" % machine_id
+            self.session.xenapi.VM.clean_shutdown(machine_ref)
+        except XenAPI.Failure:
+            print "machine with id %s is not found" % machine_id
