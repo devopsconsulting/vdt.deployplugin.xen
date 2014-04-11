@@ -117,7 +117,7 @@ class Provider(api.CmdApi):
             self.do_stop(machine_id)
             print "Destroying machine with id %s" % machine_id
 
-            disks = session.xenapi.VM.get_VBDs(machine_id)
+            disks = self.session.xenapi.VM.get_VBDs(machine_id)
             for disk_ref in disks:
                 disk_record = self.session.xenapi.VBD.get_record(disk_ref)
                 vdi_ref = disk_record.get('VDI', False)
