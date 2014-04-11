@@ -99,4 +99,31 @@ class Provider(api.CmdApi):
             self.session.xenapi.VM.clean_reboot(machine_ref)
         except XenAPI.Failure:
             print "machine with id %s is not found" % machine_id
-        
+
+    def do_destroy(self, machine_id):
+        """
+        Destroy a machine.
+
+        Usage::
+
+            xen> destroy <machine_id>
+        """
+        try:
+            machine_ref = self.session.xenapi.VM.get_by_uuid(machine_id)
+            if is_puppetmaster(machine_id):
+                print "You are not allowed to destroy the puppetmaster"
+                return
+            
+            self.do_stop(machine_id)
+            print "Destroying machine with id %s" % machine_id
+
+            disks = session.xenapi.VM.get_VBDs(machine_id)
+            for disk_ref in disks:
+                disk_record = self.session.xenapi.VBD.get_record(disk_ref)
+                vdi_ref = disk_record.get('VDI', False)
+                if not disk_record['read_only'] and vdi_ref:
+                    self.session.VDI.destroy(vdi_ref)
+            
+            self.session.VM.destroy(machine_ref)
+        except XenAPI.Failure:
+            print "machine with id %s is not found" % machine_id
