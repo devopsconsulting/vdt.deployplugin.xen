@@ -1,4 +1,4 @@
-from XenAPI import Session
+from XenAPI import Session, Failure
 from vdt.deploy import api, pretty
 from vdt.deploy.userdata import UserData
 from vdt.deploy.utils import find_by_key, \
@@ -51,3 +51,79 @@ class Provider(api.CmdApi):
             cloudstack> quit
         """
         return True
+
+    def do_start(self, machine_id):
+        """
+        Start a stopped machine.
+
+        Usage::
+
+            xen> start <machine_id>
+        """
+        try:
+            machine_ref = self.session.xenapi.VM.get_by_uuid(machine_id)
+
+            print "starting machine with id %s" % machine_id
+            self.session.xenapi.VM.start(machine_ref, False, False)
+        except Failure:
+            print "machine with id %s is not found" % machine_id
+
+    def do_stop(self, machine_id):
+        """
+        Stop a running machine.
+
+        Usage::
+
+            xen> stop <machine_id>
+        """
+        try:
+            machine_ref = self.session.xenapi.VM.get_by_uuid(machine_id)
+
+            print "stopping machine with id %s" % machine_id
+            self.session.xenapi.VM.clean_shutdown(machine_ref)
+        except Failure:
+            print "machine with id %s is not found" % machine_id
+
+    def do_reboot(self, machine_id):
+        """
+        Reboot a running machine.
+
+        Usage::
+
+            xen> reboot <machine_id>
+        """
+        try:
+            machine_ref = self.session.xenapi.VM.get_by_uuid(machine_id)
+
+            print "rebooting machine with id %s" % machine_id
+            self.session.xenapi.VM.clean_reboot(machine_ref)
+        except Failure:
+            print "machine with id %s is not found" % machine_id
+
+    def do_destroy(self, machine_id):
+        """
+        Destroy a machine.
+
+        Usage::
+
+            xen> destroy <machine_id>
+        """
+        try:
+            machine_ref = self.session.xenapi.VM.get_by_uuid(machine_id)
+            if is_puppetmaster(machine_id):
+                print "You are not allowed to destroy the puppetmaster"
+                return
+            
+            self.do_stop(machine_id)
+            print "Destroying machine with id %s" % machine_id
+
+            disks = self.session.xenapi.VM.get_VBDs(machine_ref)
+            for disk_ref in disks:
+                disk_record = self.session.xenapi.VBD.get_record(disk_ref)
+                vdi_ref = disk_record.get('VDI', False)
+                if vdi_ref:
+                    self.session.xenapi.VDI.destroy(vdi_ref)
+            
+            self.session.xenapi.VM.destroy(machine_ref)
+        except Failure as e:
+            print "machine with id %s is not found %s" % (machine_id, e)
