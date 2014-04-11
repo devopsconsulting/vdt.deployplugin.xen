@@ -1,4 +1,4 @@
-from XenAPI import Session
+from XenAPI import Session, Failure
 from vdt.deploy import api, pretty
 from vdt.deploy.userdata import UserData
 from vdt.deploy.utils import find_by_key, \
@@ -65,7 +65,7 @@ class Provider(api.CmdApi):
 
             print "starting machine with id %s" % machine_id
             self.session.xenapi.VM.start(machine_ref, False, False)
-        except XenAPI.Failure:
+        except Failure:
             print "machine with id %s is not found" % machine_id
 
     def do_stop(self, machine_id):
@@ -81,7 +81,7 @@ class Provider(api.CmdApi):
 
             print "stopping machine with id %s" % machine_id
             self.session.xenapi.VM.clean_shutdown(machine_ref)
-        except XenAPI.Failure:
+        except Failure:
             print "machine with id %s is not found" % machine_id
 
     def do_reboot(self, machine_id):
@@ -97,7 +97,7 @@ class Provider(api.CmdApi):
 
             print "rebooting machine with id %s" % machine_id
             self.session.xenapi.VM.clean_reboot(machine_ref)
-        except XenAPI.Failure:
+        except Failure:
             print "machine with id %s is not found" % machine_id
 
     def do_destroy(self, machine_id):
@@ -125,5 +125,5 @@ class Provider(api.CmdApi):
                     self.session.VDI.destroy(vdi_ref)
             
             self.session.VM.destroy(machine_ref)
-        except XenAPI.Failure:
+        except Failure:
             print "machine with id %s is not found" % machine_id
